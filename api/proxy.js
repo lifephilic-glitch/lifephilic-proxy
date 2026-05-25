@@ -1,13 +1,13 @@
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
-  if (req.method === 'GET') return new Response('AI 서버가 정상 작동 중입니다.');
+  if (req.method === 'GET') return new Response('Server Ready');
 
   try {
     const { message } = await req.json();
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // 모델명을 명시하지 않고 가장 기본적인 호출 방식을 사용합니다.
+    // 구글 API의 가장 표준적인 호출 경로입니다.
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
     const response = await fetch(url, {
@@ -18,11 +18,11 @@ export default async function handler(req) {
 
     const data = await response.json();
     
-    // 여기서 만약 404가 또 난다면 모델명이 문제가 아니라 API 키 권한 문제거나 프로젝트 환경 문제입니다.
+    // 에러 발생 시 상세 내용을 확인하기 위해 그대로 반환합니다.
     return new Response(JSON.stringify(data), {
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: "연결 실패" }), { status: 500 });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
   }
 }
