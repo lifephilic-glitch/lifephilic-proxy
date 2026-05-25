@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AI 비서</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
+        #chat { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        input { width: 80%; padding: 10px; }
+        button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <div id="chat"></div>
+    <input type="text" id="msg" placeholder="질문을 입력하세요...">
+    <button onclick="send()">전송</button>
+    <script>
+        async function send() {
+            const msg = document.getElementById('msg').value;
+            document.getElementById('chat').innerHTML += `<p><b>나:</b> ${msg}</p>`;
+            const res = await fetch('/api/proxy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            document.getElementById('chat').innerHTML += `<p><b>AI:</b> </p>`;
+            while(true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                document.getElementById('chat').lastElementChild.innerText += decoder.decode(value);
+            }
+        }
+    </script>
+</body>
+</html>
